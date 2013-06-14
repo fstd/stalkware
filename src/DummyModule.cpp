@@ -6,10 +6,9 @@
 # include <config.h>
 #endif
 
-#include <iostream>
-
-#include <ctime>
 #include <cstdlib>
+#include <cstdio>
+#include <ctime>
 
 #include "DummyModule.h"
 
@@ -18,7 +17,7 @@
 void
 DummyModule::init(string const& name, map<string, union cfgent> const& cfg)
 {
-	std::srand(std::time(NULL));
+	srand(time(NULL));
 	name_ = name;
 	minroll_ = cfg.count("minroll")
 			? cfg.at("minroll").int_ : DEF_MINROLL;
@@ -37,14 +36,14 @@ DummyModule::check(vector<vector<string> > const& stalkees,
 	for(vector<vector<string> >::const_iterator sit = stalkees.begin();
 			sit != stalkees.end(); sit++) {
 		string extname = (*sit)[0];
-		std::cerr << "extname: " << extname << std::endl;
+		fprintf(stderr, "extname: '%s'\n", extname.c_str());
 		for(vector<string>::const_iterator nit = sit->begin() + 1;
 				nit != sit->end(); nit++) {
 
 			string intname = *nit;
-			std::cerr << "\tintname: " << intname << std::endl;
+			fprintf(stderr, "\tintname: '%s'\n", intname.c_str());
 			if (find_user(intname)) {
-				std::cerr << "\t\tonline!" << std::endl;
+				fprintf(stderr, "\t\tonline!\n");
 				result.push_back(pair<string, string>(
 						extname, intname));
 				break;
@@ -56,5 +55,5 @@ DummyModule::check(vector<vector<string> > const& stalkees,
 bool
 DummyModule::find_user(string const& intname) const
 {
-	return (std::rand()>>3) % 6 >= minroll_-1;
+	return (rand()>>3) % 6 >= minroll_-1;
 }

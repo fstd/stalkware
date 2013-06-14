@@ -16,7 +16,7 @@
 
 static void process_args(int *argc, char ***argv);
 static void init(int *argc, char ***argv);
-static void usage(std::FILE *str, const char *a0, int ec);
+static void usage(FILE *str, const char *a0, int ec);
 
 
 static void
@@ -48,19 +48,19 @@ init(int *argc, char ***argv)
 
 
 static void
-usage(std::FILE *str, const char *a0, int ec)
+usage(FILE *str, const char *a0, int ec)
 {
-	#define I(STR) std::fputs(STR "\n", str)
+	#define I(STR) fputs(STR "\n", str)
 	I("===========================");
 	I("== stalkware - blah bleh ==");
 	I("===========================");
-	std::fprintf(str, "usage: %s [-h]\n", a0);
+	fprintf(str, "usage: %s [-h]\n", a0);
 	I("");
 	I("\t-h: Display brief usage statement and terminate");
 	I("");
 	I("(C) 2013, Timo Buhrmester (contact: #fstd @ irc.freenode.org)");
 	#undef I
-	std::exit(ec);
+	exit(ec);
 }
 
 

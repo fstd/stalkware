@@ -13,7 +13,7 @@
 
 class DummyModule : public Module {
 private:
-	std::string name_;
+	string name_;
 	int minroll_;
 
 	bool find_user(string const& intname) const;

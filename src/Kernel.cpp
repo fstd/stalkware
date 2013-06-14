@@ -6,7 +6,7 @@
 # include <config.h>
 #endif
 
-#include <iostream>
+#include <cstdio>
 
 #include "Kernel.h"
 
@@ -23,6 +23,6 @@ bool
 Kernel::run()
 {
 	//Module *mod = facmap_["DummyModule"]();
-	std::cerr << "i ran\n";
+	fprintf(stderr, "i ran\n");
 	return true;
 }
