@@ -10,9 +10,19 @@
 
 #include "Kernel.h"
 
+Kernel::Kernel()
+: facmap_(facarr, facarr + (sizeof facarr / sizeof *facarr))
+{
+}
+
+Kernel::~Kernel()
+{
+}
+
 bool
 Kernel::run()
 {
+	//Module *mod = facmap_["DummyModule"]();
 	std::cerr << "i ran\n";
 	return true;
 }
