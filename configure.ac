@@ -19,11 +19,13 @@ AC_PROG_MAKE_SET
 
 #AC_CHECK_HEADERS([stdbool.h stdlib.h string.h unistd.h])
 AC_CHECK_HEADER_STDBOOL
+AC_CHECK_FUNCS([strchr strdup strndup strtol])
 
 #AC_HEADER_STDBOOL
-#AC_TYPE_SIZE_T
-#AC_TYPE_SSIZE_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 
+AC_FUNC_STRTOD
 #AC_CHECK_FUNCS([getline])
 
 AC_CONFIG_FILES([Makefile

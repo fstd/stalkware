@@ -39,9 +39,19 @@ public:
 	~Kernel();
 
 	bool run();
-
+	void init(string const& stalkrc);
 private:
 	map<string, modfac_fp> facmap_;
+	map<string, Module*> modmap_;
+	map<Module*, map<string, cfgent>*> cfgmap_;
+	map<Module*, vector<vector<string> > > stmap_;
+
+	void process_stalkrc(string const& path);
+	void process_cfgline(const char *line);
+	bool nextqtok(char *data, char **tokstart, char **tokend);
+	void add_stalkee(const char *mname, vector<char*> const& user);
+	void add_cfg(const char *mname, const char *sett, const char *val);
+	void load_mod(const char *mname, const char *mclass);
 };
 
 #endif

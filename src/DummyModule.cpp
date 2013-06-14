@@ -15,12 +15,12 @@
 #define DEF_MINROLL 4
 
 void
-DummyModule::init(string const& name, map<string, union cfgent> const& cfg)
+DummyModule::init(string const& name, map<string, cfgent> const& cfg)
 {
 	srand(time(NULL));
 	name_ = name;
 	minroll_ = cfg.count("minroll")
-			? cfg.at("minroll").int_ : DEF_MINROLL;
+			? (int)cfg.at("minroll").val.lng_ : DEF_MINROLL;
 }
 
 string const&

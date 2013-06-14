@@ -20,7 +20,7 @@ private:
 
 public:
 	virtual void init(string const& name,
-			map<string, union cfgent> const& cfg);
+			map<string, cfgent> const& cfg);
 
 	virtual string const& name() const;
 

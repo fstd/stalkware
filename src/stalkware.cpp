@@ -8,11 +8,15 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include <getopt.h>
 
 #include "Kernel.h"
 
+using std::string;
+
+static char *g_stalkrc_path;
 
 static void process_args(int *argc, char ***argv);
 static void init(int *argc, char ***argv);
@@ -24,10 +28,13 @@ process_args(int *argc, char ***argv)
 {
 	char *a0 = (*argv)[0];
 
-	for(int ch; (ch = getopt(*argc, *argv, "h")) != -1;) {
+	for(int ch; (ch = getopt(*argc, *argv, "hf:")) != -1;) {
 		switch (ch) {
 		case 'h':
 			usage(stdout, a0, EXIT_SUCCESS);
+			break;
+		case 'f':
+			g_stalkrc_path = strdup(optarg);
 			break;
 		case '?':
 		default:
@@ -44,6 +51,17 @@ static void
 init(int *argc, char ***argv)
 {
 	process_args(argc, argv);
+	if (!g_stalkrc_path || strlen(g_stalkrc_path) == 0) {
+		char path[256];
+		const char *home = getenv("HOME");
+		if (!home) {
+			fprintf(stderr, "no $HOME defined, using cwd\n");
+			home = ".";
+		}
+
+		snprintf(path, sizeof path, "%s/.stalkrc", home);
+		g_stalkrc_path = strdup(path);
+	}
 }
 
 
@@ -70,6 +88,7 @@ main(int argc, char **argv)
 	init(&argc, &argv);
 
 	Kernel *k = new Kernel;
+	k->init(string(g_stalkrc_path));
 	bool ok = k->run();
 
 	delete k;

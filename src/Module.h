@@ -26,7 +26,7 @@ public:
 	 * even unreasonable) cfg defaults, if some are missing.
 	 * store the name for later retrieval by name() */
 	virtual void init(string const& name,
-			map<string, union cfgent> const& cfg) = 0;
+			map<string, struct cfgent> const& cfg) = 0;
 
 	/* return the name which was given to init() */
 	virtual string const& name() const = 0;
@@ -58,11 +58,13 @@ public:
 			vector<pair<string, string> > & result) const = 0;
 };
 
-union cfgent {
-	int int_;
-	long lng_;
-	double dbl_;
-	char* str_;
+struct cfgent {
+	enum {LNG,DBL,STR} typ;
+	union {
+		long lng_;
+		double dbl_;
+		char* str_;
+	} val;
 };
 
 #endif
