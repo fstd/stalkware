@@ -11,6 +11,8 @@
 
 #include <getopt.h>
 
+#include "Kernel.h"
+
 
 static void process_args(int *argc, char ***argv);
 static void init(int *argc, char ***argv);
@@ -67,5 +69,10 @@ main(int argc, char **argv)
 {
 	init(&argc, &argv);
 
-	std::exit(EXIT_SUCCESS);
+	Kernel *k = new Kernel;
+	bool ok = k->run();
+
+	delete k;
+
+	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
