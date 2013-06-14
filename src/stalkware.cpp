@@ -75,6 +75,7 @@ usage(FILE *str, const char *a0, int ec)
 	fprintf(str, "usage: %s [-h]\n", a0);
 	I("");
 	I("\t-h: Display brief usage statement and terminate");
+	I("\t-f <path>: use this rcfile (default ~/.stalkrc)");
 	I("");
 	I("(C) 2013, Timo Buhrmester (contact: #fstd @ irc.freenode.org)");
 	#undef I
