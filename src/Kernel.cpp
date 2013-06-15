@@ -80,7 +80,7 @@ Kernel::run()
 		map<string, cfgent> *cfg = cfgmap_[mod];
 		mod->init(it->first, *cfg);
 	}
-	
+
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
 		for(map<string, Module*>::const_iterator
@@ -117,11 +117,11 @@ Kernel::run()
 
 		deque<string> unordered;
 		deque<string> ordered;
-		
+
 		for(map<string, buddy>::const_iterator it = buddies_.begin();
 				it != buddies_.end(); it++)
 			unordered.push_back(it->first);
-	
+
 		while(unordered.size() > 0) {
 			time_t tmax = 0;
 			string maxkey = "";
@@ -137,7 +137,7 @@ Kernel::run()
 				}
 				c++;
 			}
-			
+
 			ordered.push_back(maxkey);
 			unordered.erase(unordered.begin() + maxpos);
 		}

@@ -1,19 +1,19 @@
 #load a module and give it a unique name
-load DummyModule Dummy1 
-load DummyModule Dummy2 
+load DummyModule Dummy1
+load DummyModule Dummy2
 
 #stalk <modname> <extname> <intname_1> [ <intname_2> ... ]
-stalk Dummy1 "teh fisted" fisted "fisted_" fisted__ 
-stalk Dummy1 "guest acc" guest 
+stalk Dummy1 "teh fisted" fisted "fisted_" fisted__
+stalk Dummy1 "guest acc" guest
 
-stalk Dummy2 "evil intruder" root 
+stalk Dummy2 "evil intruder" root
 
 #kernel setting
-pollint 20
+pollint 25
 
 #integer settings
-Dummy1_minroll 4 
-Dummy2_minroll 2 
+Dummy1_minroll 5
+Dummy2_minroll 6
 
 #a decimal point marks the value as double
 #Modname_somedouble 3.1415
