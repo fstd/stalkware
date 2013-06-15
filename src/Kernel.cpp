@@ -6,6 +6,8 @@
 # include <config.h>
 #endif
 
+#include <deque>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -14,6 +16,8 @@
 #include <err.h>
 
 #include "Kernel.h"
+
+using std::deque;
 
 Kernel::Kernel()
 : facmap_(facarr, facarr + (sizeof facarr / sizeof *facarr)),
@@ -111,11 +115,37 @@ Kernel::run()
 
 		time_t now = time(NULL);
 
+		deque<string> unordered;
+		deque<string> ordered;
+		
 		for(map<string, buddy>::const_iterator it = buddies_.begin();
-				it != buddies_.end(); it++) {
-			buddy const& b = it->second;
+				it != buddies_.end(); it++)
+			unordered.push_back(it->first);
+	
+		while(unordered.size() > 0) {
+			time_t tmax = 0;
+			string maxkey = "";
+			int maxpos = 0;
+			int c = 0;
+			for(deque<string>::const_iterator
+					it = unordered.begin();
+					it != unordered.end(); it++) {
+				if (maxkey=="" || buddies_[*it].tlast > tmax) {
+					tmax = buddies_[*it].tlast;
+					maxkey = *it;
+					maxpos = c;
+				}
+				c++;
+			}
+			
+			ordered.push_back(maxkey);
+			unordered.erase(unordered.begin() + maxpos);
+		}
+		for(deque<string>::const_iterator it = ordered.begin();
+				it != ordered.end(); it++) {
+			buddy const& b = buddies_[*it];
 			printf("%s (%ds ago as '%s' on '%s' using '%s')\n",
-					it->first.c_str(), (int)(now-b.tlast),
+					it->c_str(), (int)(now-b.tlast),
 					b.ilast.c_str(), b.plast.c_str(),
 					b.mlast.c_str());
 		}
