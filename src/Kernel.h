@@ -39,6 +39,7 @@ public:
 	~Kernel();
 
 	bool run();
+	void dump();
 	void init(string const& stalkrc);
 private:
 	map<string, modfac_fp> facmap_;

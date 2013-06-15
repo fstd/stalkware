@@ -27,6 +27,41 @@ Kernel::~Kernel()
 {
 }
 
+void
+Kernel::dump()
+{
+	/*for(map<Module*, map<string, cfgent>*>::const_iterator
+			it = cfgmap_.begin(); it != cfgmap_.end(); it++) {
+	}*/
+
+	for(map<Module*, vector<vector<string> > >::const_iterator
+			it = stmap_.begin(); it != stmap_.end(); it++) {
+		fprintf(stderr, "stmap[%s] dump:\n",
+				it->first->name().c_str());
+
+		const vector<vector<string> > &vec = it->second;
+
+		for(vector<vector<string> >::const_iterator
+				st = vec.begin(); st != vec.end(); st++) {
+			fprintf(stderr, "\t{\n");
+
+			const vector<string> &nvec = *st;
+
+			for(vector<string>::const_iterator
+					nt = nvec.begin();
+					nt != nvec.end(); nt++) {
+				fprintf(stderr, "\t\t'%s'\n", nt->c_str());
+			}
+
+			fprintf(stderr, "\t}\n");
+
+		}
+
+	}
+
+
+}
+
 bool
 Kernel::run()
 {
