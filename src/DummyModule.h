@@ -23,7 +23,7 @@ public:
 	DummyModule();
 	virtual ~DummyModule();
 
-	virtual void init(string const& name,
+	virtual bool init(string const& name,
 			map<string, cfgent> const& cfg);
 
 	virtual string const& name() const;

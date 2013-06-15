@@ -22,10 +22,11 @@ using std::map;
 class Module {
 public:
 	/* initialize the module with its name and a configuration map
-	 * this function is not supposed to fail, assume reasonable (or
-	 * even unreasonable) cfg defaults, if some are missing.
+	 * you may assume reasonable defaults for missing cfg entries,
+	 * however it is also fine to signal initialization failure
+	 * by returning false. if everything went good, return true.
 	 * store the name for later retrieval by name() */
-	virtual void init(string const& name,
+	virtual bool init(string const& name,
 			map<string, struct cfgent> const& cfg) = 0;
 
 	/* return the name which was given to init() */
