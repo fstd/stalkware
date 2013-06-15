@@ -139,8 +139,6 @@ IRCModule::find_user(string const& intname) const
 			throw (std::exception());
 		}
 
-		warnx("read a '%s'", tok[1]);
-
 		if (strcmp(tok[1], "PING") == 0) {
 			iprintf("PONG :%s", tok[2]);
 		} else if (strcmp(tok[1], "401") == 0) {
