@@ -74,6 +74,33 @@ Kernel::run()
 				it->first.c_str());
 		mod->init(it->first, *cfg);
 	}
+	
+	for(;;) {
+		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
+		for(map<string, Module*>::const_iterator
+				it = modmap_.begin(); it != modmap_.end();
+				it++) {
+			Module *mod = it->second;
+			vector<pair<string, string> > res;
+			try {
+				it->second->check(stmap_[mod], res);
+				for(vector<pair<string, string> >::
+						const_iterator itt =
+						res.begin(); itt !=
+						res.end(); itt++) {
+					fprintf(stderr, "on:'%s', '%s'\n",
+							itt->first.c_str(),
+							itt->second.c_str());
+				}
+			} catch(std::exception e) {
+				fprintf(stderr, "caught exception");
+			}
+		}
+
+		time_t now = time(NULL);
+		if (now < tnext)
+			sleep(tnext - now);
+	}
 
 	return true;
 }
