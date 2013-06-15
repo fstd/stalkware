@@ -19,7 +19,7 @@ IRCModule::~IRCModule()
 {
 }
 
-void
+bool
 IRCModule::init(string const& name, map<string, cfgent> const& cfg)
 {
 	name_ = name;
