@@ -127,7 +127,7 @@ Kernel::process_cfgline(const char *line)
 					(int)(tokend-tokstart),
 					(int)(tokend-tokstart), tokstart);
 
-			namevec.push_back(strndup(tok, (size_t)(tokend-tokstart)));
+			namevec.push_back(strndup(tokstart, (size_t)(tokend-tokstart)));
 
 			start = tokend;
 			if (*tokend)
