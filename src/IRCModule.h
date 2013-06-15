@@ -9,14 +9,24 @@
 # include <config.h>
 #endif
 
+extern "C" {
+#include <libsrsirc/irc_basic.h>
+#include <libsrsirc/irc_util.h>
+}
+
 #include "Module.h"
 
 class IRCModule : public Module {
 private:
 	string name_;
 	string pstr_;
+	ibhnd_t irc_;
+	unsigned long conto_; //microseconds
+	int sendwait_; //seconds
+	bool keepalive_;
 
 	bool find_user(string const& intname) const;
+	void iprintf(const char *fmt, ...) const;
 
 public:
 	IRCModule();

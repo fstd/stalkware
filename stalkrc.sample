@@ -15,6 +15,7 @@ stalk QuakeNet icat icat icat_
 
 QuakeNet_server nl.quakenet.org
 QuakeNet_port 6667
+QuakeNet_keepalive 1
 
 #integer settings
 Dummy1_minroll 5
