@@ -8,13 +8,22 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+
+#include <err.h>
 
 #include <getopt.h>
 
+#include "Kernel.h"
+
+using std::string;
+
+static char *g_stalkrc_path;
+static int g_out_spacing;
 
 static void process_args(int *argc, char ***argv);
 static void init(int *argc, char ***argv);
-static void usage(std::FILE *str, const char *a0, int ec);
+static void usage(FILE *str, const char *a0, int ec);
 
 
 static void
@@ -22,10 +31,16 @@ process_args(int *argc, char ***argv)
 {
 	char *a0 = (*argv)[0];
 
-	for(int ch; (ch = getopt(*argc, *argv, "h")) != -1;) {
+	for(int ch; (ch = getopt(*argc, *argv, "hf:s:")) != -1;) {
 		switch (ch) {
 		case 'h':
 			usage(stdout, a0, EXIT_SUCCESS);
+			break;
+		case 's':
+			g_out_spacing = (int)strtol(optarg, NULL, 10);
+			break;
+		case 'f':
+			g_stalkrc_path = strdup(optarg);
 			break;
 		case '?':
 		default:
@@ -42,23 +57,35 @@ static void
 init(int *argc, char ***argv)
 {
 	process_args(argc, argv);
+	if (!g_stalkrc_path || strlen(g_stalkrc_path) == 0) {
+		char path[256];
+		const char *home = getenv("HOME");
+		if (!home) {
+			warnx("no $HOME defined, using cwd");
+			home = ".";
+		}
+
+		snprintf(path, sizeof path, "%s/.stalkrc", home);
+		g_stalkrc_path = strdup(path);
+	}
 }
 
 
 static void
-usage(std::FILE *str, const char *a0, int ec)
+usage(FILE *str, const char *a0, int ec)
 {
-	#define I(STR) std::fputs(STR "\n", str)
-	I("===========================");
-	I("== stalkware - blah bleh ==");
-	I("===========================");
-	std::fprintf(str, "usage: %s [-h]\n", a0);
+	#define I(STR) fputs(STR "\n", str)
+	I("=================================");
+	I("== stalkware "PACKAGE_VERSION" - blah bleh ==");
+	I("=================================");
+	fprintf(str, "usage: %s [-h]\n", a0);
 	I("");
 	I("\t-h: Display brief usage statement and terminate");
+	I("\t-f <path>: use this rcfile (default ~/.stalkrc)");
 	I("");
 	I("(C) 2013, Timo Buhrmester (contact: #fstd @ irc.freenode.org)");
 	#undef I
-	std::exit(ec);
+	exit(ec);
 }
 
 
@@ -67,5 +94,11 @@ main(int argc, char **argv)
 {
 	init(&argc, &argv);
 
-	std::exit(EXIT_SUCCESS);
+	Kernel *k = new Kernel;
+	k->init(string(g_stalkrc_path), g_out_spacing);
+	bool ok = k->run();
+
+	delete k;
+
+	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
