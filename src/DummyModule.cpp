@@ -26,13 +26,14 @@ DummyModule::~DummyModule()
 {
 }
 
-void
+bool
 DummyModule::init(string const& name, map<string, cfgent> const& cfg)
 {
 	srand(time(NULL));
 	name_ = name;
 	if (cfg.count("minroll"))
 		minroll_ = (int)cfg.at("minroll").val.lng_;
+	return true;
 }
 
 string const&
