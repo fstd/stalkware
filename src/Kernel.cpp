@@ -19,7 +19,8 @@ Kernel::Kernel()
 : facmap_(facarr, facarr + (sizeof facarr / sizeof *facarr)),
   modmap_(),
   cfgmap_(),
-  stmap_()
+  stmap_(),
+  kerncfg_()
 {
 }
 
@@ -180,9 +181,15 @@ Kernel::process_cfgline(const char *line)
 
 	} else {
 		char *cmddup = strdup(tok);
-		char *itok = strtok_r(cmddup, "_", &ctx2);
-		char *mod = strdup(itok);
-		itok = strtok_r(NULL, "\t ", &ctx2);
+		char *mod = NULL, *itok;
+		if (strchr(cmddup, '_')) {
+			itok = strtok_r(cmddup, "_", &ctx2);
+			mod = strdup(itok);
+			itok = strtok_r(NULL, "\t ", &ctx2);
+		} else {
+			itok = strtok_r(cmddup, "\t ", &ctx2);
+		}
+
 		char *sett = strdup(itok);
 		itok = strtok_r(NULL, "\0", &ctx);
 		while(isspace(*itok))
@@ -254,19 +261,25 @@ Kernel::add_stalkee(const char *mname, vector<char*> const& user)
 	for(vector<char*>::const_iterator it = user.begin();
 			it != user.end(); it++) {
 		stvec.back().push_back(string(*it));
+		fprintf(stderr, "pushed '%s'\n", string(*it).c_str());
 	}
 }
 
 void
 Kernel::add_cfg(const char *mname, const char *sett, const char *val)
 {
-	if (!modmap_.count(std::string(mname))) {
-		warnx("unknown module: '%s'", mname);
-		return;
-	}
+	map<string, cfgent> *cfg;
+	if (mname) {
+		if (!modmap_.count(std::string(mname))) {
+			warnx("unknown module: '%s'", mname);
+			return;
+		}
 
-	Module *mod = modmap_[mname];
-	map<string, cfgent> *cfg = cfgmap_[mod];
+		Module *mod = modmap_[mname];
+		cfg = cfgmap_[mod];
+	} else
+		cfg = &kerncfg_;
+
 
 	if ((*val >= '0' && *val <= '9') || *val == '-' || *val == '.') {
 		if (strchr(val, '.')||strchr(val, 'e')||strchr(val, 'E')) {

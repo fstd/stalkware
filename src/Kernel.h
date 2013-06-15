@@ -46,6 +46,7 @@ private:
 	map<string, Module*> modmap_;
 	map<Module*, map<string, cfgent>*> cfgmap_;
 	map<Module*, vector<vector<string> > > stmap_;
+	map<string, cfgent> kerncfg_;
 
 	void process_stalkrc(string const& path);
 	void process_cfgline(const char *line);

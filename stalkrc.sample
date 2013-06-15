@@ -8,6 +8,9 @@ stalk Dummy1 "guest acc" guest
 
 stalk Dummy2 "evil intruder" root 
 
+#kernel setting
+pollint 20
+
 #integer settings
 Dummy1_minroll 4 
 Dummy2_minroll 2 
