@@ -75,9 +75,9 @@ static void
 usage(FILE *str, const char *a0, int ec)
 {
 	#define I(STR) fputs(STR "\n", str)
-	I("===========================");
-	I("== stalkware - blah bleh ==");
-	I("===========================");
+	I("=================================");
+	I("== stalkware "PACKAGE_VERSION" - blah bleh ==");
+	I("=================================");
 	fprintf(str, "usage: %s [-h]\n", a0);
 	I("");
 	I("\t-h: Display brief usage statement and terminate");
