@@ -21,6 +21,7 @@ Kernel::Kernel()
   cfgmap_(),
   stmap_(),
   kerncfg_(),
+  buddies_(),
   spc_(0)
 {
 }
@@ -78,7 +79,6 @@ Kernel::run()
 	
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
-		vector<string> outQ;
 		for(map<string, Module*>::const_iterator
 				it = modmap_.begin(); it != modmap_.end();
 				it++) {
@@ -90,15 +90,10 @@ Kernel::run()
 						const_iterator itt =
 						res.begin(); itt !=
 						res.end(); itt++) {
-					char buf[512];
-					snprintf(buf, sizeof buf,
-							"found '%s' as '%s'"
-							" on '%s' using '%s'",
-							itt->first.c_str(),
-							itt->second.c_str(),
-							mod->pname().c_str(),
-							mod->name().c_str());
-					outQ.push_back(buf);
+					buddies_[itt->first].tlast = time(NULL);
+					buddies_[itt->first].plast = mod->pname();
+					buddies_[itt->first].mlast = mod->name();
+					buddies_[itt->first].ilast = itt->second;
 				}
 			} catch(std::exception e) {
 				warnx("caught exception");
@@ -114,14 +109,17 @@ Kernel::run()
 				puts(spc);
 		}
 
-		for(vector<string>::const_iterator it = outQ.begin();
-				it != outQ.end(); it++) {
-			puts(it->c_str());
+		time_t now = time(NULL);
+
+		for(map<string, buddy>::const_iterator it = buddies_.begin();
+				it != buddies_.end(); it++) {
+			buddy const& b = it->second;
+			printf("%s (%ds ago as '%s' on '%s' using '%s')\n",
+					it->first.c_str(), (int)(now-b.tlast),
+					b.ilast.c_str(), b.plast.c_str(),
+					b.mlast.c_str());
 		}
 
-		
-
-		time_t now = time(NULL);
 		if (now < tnext)
 			sleep(tnext - now);
 	}
@@ -302,6 +300,12 @@ Kernel::add_stalkee(const char *mname, vector<char*> const& user)
 			it != user.end(); it++) {
 		stvec.back().push_back(string(*it));
 	}
+
+	string key(user[0]);
+	buddies_[key].tlast = 0;
+	buddies_[key].plast = "N/A";
+	buddies_[key].mlast = "N/A";
+	buddies_[key].ilast = "N/A";
 }
 
 void

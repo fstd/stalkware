@@ -33,6 +33,13 @@ static struct modreg_s facarr[] = {
 
 #undef REG
 
+struct buddy {
+	time_t tlast;
+	string plast;
+	string mlast;
+	string ilast;
+};
+
 class Kernel {
 public:
 	Kernel();
@@ -47,6 +54,7 @@ private:
 	map<Module*, map<string, cfgent>*> cfgmap_;
 	map<Module*, vector<vector<string> > > stmap_;
 	map<string, cfgent> kerncfg_;
+	map<string, buddy> buddies_;
 
 	int spc_;
 
