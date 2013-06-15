@@ -26,7 +26,7 @@ DummyModule::~DummyModule()
 {
 }
 
-void
+bool
 DummyModule::init(string const& name, map<string, cfgent> const& cfg)
 {
 	srand(time(NULL));
