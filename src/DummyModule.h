@@ -15,14 +15,19 @@ class DummyModule : public Module {
 private:
 	string name_;
 	int minroll_;
+	string pstr_;
 
 	bool find_user(string const& intname) const;
 
 public:
+	DummyModule();
+	virtual ~DummyModule();
+
 	virtual void init(string const& name,
 			map<string, cfgent> const& cfg);
 
 	virtual string const& name() const;
+	virtual string const& pname() const { return pstr_; };
 
 	virtual void check(vector<vector<string> > const& stalkees,
 			vector<pair<string, string> > & result) const;

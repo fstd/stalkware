@@ -31,6 +31,10 @@ public:
 	/* return the name which was given to init() */
 	virtual string const& name() const = 0;
 
+	/* return the name of the platform (e.g. "IRC") this module
+	 * is dealing with. */
+	virtual string const& pname() const = 0;
+
 	/* check your realm for online stalkees.
 	 * ,,stalkees'' is a vector of users to stalk. Each stalkee has one
 	 * 'external' name, and one or more 'internal' names.
@@ -56,6 +60,9 @@ public:
 	 */
 	virtual void check(vector<vector<string> > const& stalkees,
 			vector<pair<string, string> > & result) const = 0;
+
+	/* a virtual dtor since we're an ABC */
+	virtual ~Module() {}
 };
 
 struct cfgent {

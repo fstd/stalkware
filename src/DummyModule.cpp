@@ -14,13 +14,25 @@
 
 #define DEF_MINROLL 4
 
+DummyModule::DummyModule()
+: Module(),
+  name_("N/A"),
+  minroll_(DEF_MINROLL),
+  pstr_("DummyPlatform")
+{
+}
+
+DummyModule::~DummyModule()
+{
+}
+
 void
 DummyModule::init(string const& name, map<string, cfgent> const& cfg)
 {
 	srand(time(NULL));
 	name_ = name;
-	minroll_ = cfg.count("minroll")
-			? (int)cfg.at("minroll").val.lng_ : DEF_MINROLL;
+	if (cfg.count("minroll"))
+		minroll_ = (int)cfg.at("minroll").val.lng_;
 }
 
 string const&
