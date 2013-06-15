@@ -2,14 +2,19 @@
 load DummyModule Dummy1
 load DummyModule Dummy2
 
+load IRCModule QuakeNet
+
 #stalk <modname> <extname> <intname_1> [ <intname_2> ... ]
 stalk Dummy1 "teh fisted" fisted "fisted_" fisted__
 stalk Dummy1 "guest acc" guest
 
 stalk Dummy2 "evil intruder" root
 
-#kernel setting
-pollint 25
+stalk QuakeNet "teh fisted" fisted fisted_
+stalk QuakeNet icat icat icat_
+
+QuakeNet_server nl.quakenet.org
+QuakeNet_port 6667
 
 #integer settings
 Dummy1_minroll 5
@@ -19,3 +24,6 @@ Dummy2_minroll 6
 #Modname_somedouble 3.1415
 
 #Modname_somestring ohai faggets
+
+#kernel setting
+pollint 25
