@@ -70,8 +70,6 @@ Kernel::run()
 			it != modmap_.end(); it++) {
 		Module *mod = it->second;
 		map<string, cfgent> *cfg = cfgmap_[mod];
-		fprintf(stderr, "initializing module '%s'\n",
-				it->first.c_str());
 		mod->init(it->first, *cfg);
 	}
 	
@@ -93,7 +91,7 @@ Kernel::run()
 							itt->second.c_str());
 				}
 			} catch(std::exception e) {
-				fprintf(stderr, "caught exception");
+				warnx("caught exception");
 			}
 		}
 
@@ -165,9 +163,6 @@ Kernel::process_cfgline(const char *line)
 		char *modname = strdup(tok);
 		if (strtok_r(NULL, "\t ", &ctx))
 			warnx("too many tokens (some ignored): '%s'", line);
-		fprintf(stderr, "load: modclass '%s', modname '%s'\n",
-				modclass, modname);
-
 		load_mod(modname, modclass);
 
 		free(modclass);
@@ -180,16 +175,9 @@ Kernel::process_cfgline(const char *line)
 		char *remainder = strdup(tok);
 		vector<char*> namevec;
 
-		fprintf(stderr, "stalk: modname '%s', remainder '%s'\n",
-				modname, remainder);
-
 		char *start = remainder;
 		char *tokstart, *tokend;
 		while(nextqtok(start, &tokstart, &tokend)) {
-			fprintf(stderr, "tok: '%*.*s'\n",
-					(int)(tokend-tokstart),
-					(int)(tokend-tokstart), tokstart);
-
 			namevec.push_back(strndup(tokstart, (size_t)(tokend-tokstart)));
 
 			start = tokend;
@@ -223,8 +211,6 @@ Kernel::process_cfgline(const char *line)
 			itok++;
 
 		char *val = strdup(itok);
-		fprintf(stderr, "set: mod '%s', sett '%s', val '%s'\n",
-				mod, sett, val);
 
 		add_cfg(mod, sett, val);
 
@@ -288,7 +274,6 @@ Kernel::add_stalkee(const char *mname, vector<char*> const& user)
 	for(vector<char*>::const_iterator it = user.begin();
 			it != user.end(); it++) {
 		stvec.back().push_back(string(*it));
-		fprintf(stderr, "pushed '%s'\n", string(*it).c_str());
 	}
 }
 

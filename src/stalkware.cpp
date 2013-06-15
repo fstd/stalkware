@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <err.h>
+
 #include <getopt.h>
 
 #include "Kernel.h"
@@ -55,7 +57,7 @@ init(int *argc, char ***argv)
 		char path[256];
 		const char *home = getenv("HOME");
 		if (!home) {
-			fprintf(stderr, "no $HOME defined, using cwd\n");
+			warnx("no $HOME defined, using cwd");
 			home = ".";
 		}
 

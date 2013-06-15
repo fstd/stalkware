@@ -36,14 +36,11 @@ DummyModule::check(vector<vector<string> > const& stalkees,
 	for(vector<vector<string> >::const_iterator sit = stalkees.begin();
 			sit != stalkees.end(); sit++) {
 		string extname = (*sit)[0];
-		fprintf(stderr, "extname: '%s'\n", extname.c_str());
 		for(vector<string>::const_iterator nit = sit->begin() + 1;
 				nit != sit->end(); nit++) {
 
 			string intname = *nit;
-			fprintf(stderr, "\tintname: '%s'\n", intname.c_str());
 			if (find_user(intname)) {
-				fprintf(stderr, "\t\tonline!\n");
 				result.push_back(pair<string, string>(
 						extname, intname));
 				break;
