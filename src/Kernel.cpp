@@ -20,7 +20,8 @@ Kernel::Kernel()
   modmap_(),
   cfgmap_(),
   stmap_(),
-  kerncfg_()
+  kerncfg_(),
+  spc_(0)
 {
 }
 
@@ -66,6 +67,8 @@ Kernel::dump()
 bool
 Kernel::run()
 {
+	char *spc = NULL;
+
 	for(map<string, Module*>::const_iterator it = modmap_.begin();
 			it != modmap_.end(); it++) {
 		Module *mod = it->second;
@@ -75,6 +78,7 @@ Kernel::run()
 	
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
+		vector<string> outQ;
 		for(map<string, Module*>::const_iterator
 				it = modmap_.begin(); it != modmap_.end();
 				it++) {
@@ -86,14 +90,36 @@ Kernel::run()
 						const_iterator itt =
 						res.begin(); itt !=
 						res.end(); itt++) {
-					fprintf(stderr, "on:'%s', '%s'\n",
+					char buf[512];
+					snprintf(buf, sizeof buf,
+							"found '%s' as '%s'"
+							" on '%s' using '%s'",
 							itt->first.c_str(),
-							itt->second.c_str());
+							itt->second.c_str(),
+							mod->pname().c_str(),
+							mod->name().c_str());
+					outQ.push_back(buf);
 				}
 			} catch(std::exception e) {
 				warnx("caught exception");
 			}
 		}
+
+		if (spc_) {
+			if (!spc) {
+				spc = new char[spc_];
+				memset(spc, '\n', spc_-1);
+				spc[spc_-1] = '\0';
+			} else //dont do it the first time
+				puts(spc);
+		}
+
+		for(vector<string>::const_iterator it = outQ.begin();
+				it != outQ.end(); it++) {
+			puts(it->c_str());
+		}
+
+		
 
 		time_t now = time(NULL);
 		if (now < tnext)
@@ -104,8 +130,9 @@ Kernel::run()
 }
 
 void
-Kernel::init(string const& stalkrc)
+Kernel::init(string const& stalkrc, int spacing)
 {
+	spc_ = spacing;
 	process_stalkrc(stalkrc);
 }
 

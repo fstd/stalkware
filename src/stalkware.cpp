@@ -19,6 +19,7 @@
 using std::string;
 
 static char *g_stalkrc_path;
+static int g_out_spacing;
 
 static void process_args(int *argc, char ***argv);
 static void init(int *argc, char ***argv);
@@ -30,10 +31,13 @@ process_args(int *argc, char ***argv)
 {
 	char *a0 = (*argv)[0];
 
-	for(int ch; (ch = getopt(*argc, *argv, "hf:")) != -1;) {
+	for(int ch; (ch = getopt(*argc, *argv, "hf:s:")) != -1;) {
 		switch (ch) {
 		case 'h':
 			usage(stdout, a0, EXIT_SUCCESS);
+			break;
+		case 's':
+			g_out_spacing = (int)strtol(optarg, NULL, 10);
 			break;
 		case 'f':
 			g_stalkrc_path = strdup(optarg);
@@ -91,7 +95,7 @@ main(int argc, char **argv)
 	init(&argc, &argv);
 
 	Kernel *k = new Kernel;
-	k->init(string(g_stalkrc_path));
+	k->init(string(g_stalkrc_path), g_out_spacing);
 	bool ok = k->run();
 
 	delete k;
