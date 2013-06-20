@@ -83,6 +83,7 @@ Kernel::run()
 
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
+		bool changed = false;
 		for(map<string, Module*>::const_iterator
 				it = modmap_.begin(); it != modmap_.end();
 				it++) {
@@ -94,6 +95,7 @@ Kernel::run()
 						const_iterator itt =
 						res.begin(); itt !=
 						res.end(); itt++) {
+					changed = true;
 					buddies_[itt->first].tlast = time(NULL);
 					buddies_[itt->first].plast = mod->pname();
 					buddies_[itt->first].mlast = mod->name();
@@ -103,6 +105,11 @@ Kernel::run()
 				warnx("caught exception");
 			}
 		}
+
+		if (changed) {
+			save_stalkstate(statepath_);
+		}
+
 
 		if (spc_) {
 			if (!spc) {
@@ -144,10 +151,30 @@ Kernel::run()
 		for(deque<string>::const_iterator it = ordered.begin();
 				it != ordered.end(); it++) {
 			buddy const& b = buddies_[*it];
-			printf("%s (%ds ago as '%s' on '%s' using '%s')\n",
-					it->c_str(), (int)(now-b.tlast),
-					b.ilast.c_str(), b.plast.c_str(),
-					b.mlast.c_str());
+			if (!b.tlast) {
+				printf("%s (never seen)\n", it->c_str());
+			} else {
+				int sago = (int)(now-b.tlast);
+				char schar = 's';
+				if (sago > 60*60*24*365) {
+					schar = 'y';
+					sago /= 60*60*24*365;
+				} else if (sago > 60*60*24) {
+					schar = 'd';
+					sago /= 60*60*24;
+				} else if (sago > 60*60) {
+					schar = 'h';
+					sago /= 60*60;
+				} else if (sago > 60) {
+					schar = 'm';
+					sago /= 60;
+				}
+
+				printf("%s (%d%c ago as '%s' on '%s' using '%s')\n",
+						it->c_str(), sago, schar,
+						b.ilast.c_str(), b.plast.c_str(),
+						b.mlast.c_str());
+			}
 		}
 
 		if (now < tnext)
@@ -158,10 +185,12 @@ Kernel::run()
 }
 
 void
-Kernel::init(string const& stalkrc, int spacing)
+Kernel::init(string const& stalkrc, string const& stalkstate, int spacing)
 {
 	spc_ = spacing;
+	statepath_ = stalkstate;
 	process_stalkrc(stalkrc);
+	load_stalkstate(statepath_);
 }
 
 void
@@ -202,6 +231,72 @@ Kernel::process_stalkrc(string const& path)
 
 	fclose(fp);
 	free(line);
+}
+
+void
+Kernel::load_stalkstate(string const& path)
+{
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	errno = 0;
+	FILE *fp = fopen(path.c_str(), "r");
+	if (!fp) {
+		warn("couldn't fopen() '%s'", path.c_str());
+		return;
+	}
+
+	while ((read = getline(&line, &len, fp)) != -1) {
+		char *dup = strdup(line);
+
+		string name(strtok(dup, "\t"));
+		if (!buddies_.count(name)) {
+			warnx("unknown buddy '%s' in state file",
+					name.c_str());
+			free(dup);
+			continue;
+		}
+			
+
+		buddies_[name].tlast = (time_t)strtol(strtok(NULL, "\t"),
+				NULL, 10);
+		buddies_[name].mlast = string(strtok(NULL, "\t"));
+		buddies_[name].plast = string(strtok(NULL, "\t"));
+		buddies_[name].ilast = string(strtok(NULL, "\n"));
+
+		free(dup);
+	}
+
+	fclose(fp);
+	free(line);
+}
+
+void
+Kernel::save_stalkstate(string const& path)
+{
+	errno = 0;
+	FILE *fp = fopen(path.c_str(), "w");
+	if (!fp) {
+		warn("couldn't fopen() '%s'", path.c_str());
+		return;
+	}
+	
+	for(map<string, buddy>::const_iterator it = buddies_.begin();
+			it != buddies_.end(); it++) {
+		if (it->second.tlast == 0)
+			continue;
+		char buf[1024];
+		snprintf(buf, 1024, "%s\t%lu\t%s\t%s\t%s\n",
+				it->first.c_str(),
+				(unsigned long)it->second.tlast,
+				it->second.mlast.c_str(),
+				it->second.plast.c_str(),
+				it->second.ilast.c_str());
+		fputs(buf, fp);
+	}
+
+	fclose(fp);
 }
 
 void
