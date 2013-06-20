@@ -26,11 +26,13 @@ struct modreg_s {
 // for each new module, add the include here:
 #include "DummyModule.h"
 #include "IRCModule.h"
+#include "TWModule.h"
 
 static struct modreg_s facarr[] = {
 // and register here:
 	REG(DummyModule),
-	REG(IRCModule)
+	REG(IRCModule),
+	REG(TWModule)
 };
 
 #undef REG
@@ -49,7 +51,8 @@ public:
 
 	bool run();
 	void dump();
-	void init(string const& stalkrc, int spacing);
+	void init(string const& stalkrc, string const& stalkstate,
+			int spacing);
 private:
 	map<string, modfac_fp> facmap_;
 	map<string, Module*> modmap_;
@@ -59,8 +62,11 @@ private:
 	map<string, buddy> buddies_;
 
 	int spc_;
+	string statepath_;
 
 	void process_stalkrc(string const& path);
+	void load_stalkstate(string const& path);
+	void save_stalkstate(string const& path);
 	void process_cfgline(const char *line);
 	bool nextqtok(char *data, char **tokstart, char **tokend);
 	void add_stalkee(const char *mname, vector<char*> const& user);

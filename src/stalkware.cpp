@@ -19,6 +19,7 @@
 using std::string;
 
 static char *g_stalkrc_path;
+static char *g_stalkstate_path;
 static int g_out_spacing;
 
 static void process_args(int *argc, char ***argv);
@@ -41,6 +42,9 @@ process_args(int *argc, char ***argv)
 			break;
 		case 'f':
 			g_stalkrc_path = strdup(optarg);
+			break;
+		case 'S':
+			g_stalkstate_path = strdup(optarg);
 			break;
 		case '?':
 		default:
@@ -68,6 +72,18 @@ init(int *argc, char ***argv)
 		snprintf(path, sizeof path, "%s/.stalkrc", home);
 		g_stalkrc_path = strdup(path);
 	}
+
+	if (!g_stalkstate_path || strlen(g_stalkstate_path) == 0) {
+		char path[256];
+		const char *home = getenv("HOME");
+		if (!home) {
+			warnx("no $HOME defined, using cwd");
+			home = ".";
+		}
+
+		snprintf(path, sizeof path, "%s/.stalkstate", home);
+		g_stalkstate_path = strdup(path);
+	}
 }
 
 
@@ -82,6 +98,7 @@ usage(FILE *str, const char *a0, int ec)
 	I("");
 	I("\t-h: Display brief usage statement and terminate");
 	I("\t-f <path>: use this rcfile (default ~/.stalkrc)");
+	I("\t-S <path>: use this statefile (default ~/.stalkstate)");
 	I("");
 	I("(C) 2013, Timo Buhrmester (contact: #fstd @ irc.freenode.org)");
 	#undef I
@@ -95,7 +112,8 @@ main(int argc, char **argv)
 	init(&argc, &argv);
 
 	Kernel *k = new Kernel;
-	k->init(string(g_stalkrc_path), g_out_spacing);
+	k->init(string(g_stalkrc_path), string(g_stalkstate_path),
+			g_out_spacing);
 	bool ok = k->run();
 
 	delete k;
