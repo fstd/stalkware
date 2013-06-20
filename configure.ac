@@ -11,6 +11,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11([ext], [mandatory])
 AC_PROG_CC
 AC_PROG_MAKE_SET
 #AC_PROG_INSTALL
@@ -41,7 +42,8 @@ echo \
  ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
  Prefix: '${prefix}'.
- Compiler: '${CC} ${CFLAGS} ${CPPFLAGS}'
+ C Compiler: '${CC} ${CFLAGS}'
+ C++ Compiler: '${CXX} ${CXXFLAGS}'
  Libraries: '${LIBS}'
 
 --------------------------------------------------"
