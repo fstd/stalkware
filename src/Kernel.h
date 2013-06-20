@@ -26,11 +26,13 @@ struct modreg_s {
 // for each new module, add the include here:
 #include "DummyModule.h"
 #include "IRCModule.h"
+#include "TWModule.h"
 
 static struct modreg_s facarr[] = {
 // and register here:
 	REG(DummyModule),
-	REG(IRCModule)
+	REG(IRCModule),
+	REG(TWModule)
 };
 
 #undef REG
