@@ -81,6 +81,8 @@ Kernel::run()
 		mod->init(it->first, *cfg);
 	}
 
+	display(time(NULL));
+
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
 		bool changed = false;
@@ -116,72 +118,79 @@ Kernel::run()
 				spc = new char[spc_];
 				memset(spc, '\n', spc_-1);
 				spc[spc_-1] = '\0';
-			} else //dont do it the first time
-				puts(spc);
+			} 
+
+			puts(spc);
 		}
 
 		time_t now = time(NULL);
 
-		deque<string> unordered;
-		deque<string> ordered;
-
-		for(map<string, buddy>::const_iterator it = buddies_.begin();
-				it != buddies_.end(); it++)
-			unordered.push_back(it->first);
-
-		while(unordered.size() > 0) {
-			time_t tmax = 0;
-			string maxkey = "";
-			int maxpos = 0;
-			int c = 0;
-			for(deque<string>::const_iterator
-					it = unordered.begin();
-					it != unordered.end(); it++) {
-				if (maxkey=="" || buddies_[*it].tlast > tmax) {
-					tmax = buddies_[*it].tlast;
-					maxkey = *it;
-					maxpos = c;
-				}
-				c++;
-			}
-
-			ordered.push_back(maxkey);
-			unordered.erase(unordered.begin() + maxpos);
-		}
-		for(deque<string>::const_iterator it = ordered.begin();
-				it != ordered.end(); it++) {
-			buddy const& b = buddies_[*it];
-			if (!b.tlast) {
-				printf("%s (never seen)\n", it->c_str());
-			} else {
-				int sago = (int)(now-b.tlast);
-				char schar = 's';
-				if (sago > 60*60*24*365) {
-					schar = 'y';
-					sago /= 60*60*24*365;
-				} else if (sago > 60*60*24) {
-					schar = 'd';
-					sago /= 60*60*24;
-				} else if (sago > 60*60) {
-					schar = 'h';
-					sago /= 60*60;
-				} else if (sago > 60) {
-					schar = 'm';
-					sago /= 60;
-				}
-
-				printf("%s (%d%c ago as '%s' on '%s' using '%s')\n",
-						it->c_str(), sago, schar,
-						b.ilast.c_str(), b.plast.c_str(),
-						b.mlast.c_str());
-			}
-		}
+		display(now);
 
 		if (now < tnext)
 			sleep(tnext - now);
 	}
 
 	return true;
+}
+
+void
+Kernel::display(time_t now)
+{
+	deque<string> unordered;
+	deque<string> ordered;
+
+	for(map<string, buddy>::const_iterator it = buddies_.begin();
+			it != buddies_.end(); it++)
+		unordered.push_back(it->first);
+
+	while(unordered.size() > 0) {
+		time_t tmax = 0;
+		string maxkey = "";
+		int maxpos = 0;
+		int c = 0;
+		for(deque<string>::const_iterator
+				it = unordered.begin();
+				it != unordered.end(); it++) {
+			if (maxkey=="" || buddies_[*it].tlast > tmax) {
+				tmax = buddies_[*it].tlast;
+				maxkey = *it;
+				maxpos = c;
+			}
+			c++;
+		}
+
+		ordered.push_back(maxkey);
+		unordered.erase(unordered.begin() + maxpos);
+	}
+	for(deque<string>::const_iterator it = ordered.begin();
+			it != ordered.end(); it++) {
+		buddy const& b = buddies_[*it];
+		if (!b.tlast) {
+			printf("%s (never seen)\n", it->c_str());
+		} else {
+			int sago = (int)(now-b.tlast);
+			char schar = 's';
+			if (sago > 60*60*24*365) {
+				schar = 'y';
+				sago /= 60*60*24*365;
+			} else if (sago > 60*60*24) {
+				schar = 'd';
+				sago /= 60*60*24;
+			} else if (sago > 60*60) {
+				schar = 'h';
+				sago /= 60*60;
+			} else if (sago > 60) {
+				schar = 'm';
+				sago /= 60;
+			}
+
+			printf("%s (%d%c; %s@%s/%s)\n",
+					it->c_str(), sago, schar,
+					b.ilast.c_str(), b.plast.c_str(),
+					b.mlast.c_str());
+		}
+	}
 }
 
 void

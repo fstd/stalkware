@@ -72,6 +72,7 @@ private:
 	void add_stalkee(const char *mname, vector<char*> const& user);
 	void add_cfg(const char *mname, const char *sett, const char *val);
 	void load_mod(const char *mname, const char *mclass);
+	void display(time_t now);
 };
 
 #endif
