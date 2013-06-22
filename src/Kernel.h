@@ -42,6 +42,7 @@ struct buddy {
 	string plast;
 	string mlast;
 	string ilast;
+	bool ison;
 };
 
 class Kernel {
@@ -52,7 +53,7 @@ public:
 	bool run();
 	void dump();
 	void init(string const& stalkrc, string const& stalkstate,
-			int spacing);
+			int spacing, bool colors);
 private:
 	map<string, modfac_fp> facmap_;
 	map<string, Module*> modmap_;
@@ -63,6 +64,7 @@ private:
 
 	int spc_;
 	string statepath_;
+	bool col_;
 
 	void process_stalkrc(string const& path);
 	void load_stalkstate(string const& path);
@@ -72,6 +74,7 @@ private:
 	void add_stalkee(const char *mname, vector<char*> const& user);
 	void add_cfg(const char *mname, const char *sett, const char *val);
 	void load_mod(const char *mname, const char *mclass);
+	void display(time_t now);
 };
 
 #endif

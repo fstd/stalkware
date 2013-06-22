@@ -20,6 +20,7 @@ using std::string;
 
 static char *g_stalkrc_path;
 static char *g_stalkstate_path;
+static bool g_colors;
 static int g_out_spacing;
 
 static void process_args(int *argc, char ***argv);
@@ -32,10 +33,13 @@ process_args(int *argc, char ***argv)
 {
 	char *a0 = (*argv)[0];
 
-	for(int ch; (ch = getopt(*argc, *argv, "hf:s:")) != -1;) {
+	for(int ch; (ch = getopt(*argc, *argv, "f:s:ch")) != -1;) {
 		switch (ch) {
 		case 'h':
 			usage(stdout, a0, EXIT_SUCCESS);
+			break;
+		case 'c':
+			g_colors = true;
 			break;
 		case 's':
 			g_out_spacing = (int)strtol(optarg, NULL, 10);
@@ -99,6 +103,7 @@ usage(FILE *str, const char *a0, int ec)
 	I("\t-h: Display brief usage statement and terminate");
 	I("\t-f <path>: use this rcfile (default ~/.stalkrc)");
 	I("\t-S <path>: use this statefile (default ~/.stalkstate)");
+	I("\t-c: use bash-style color sequences on stdout");
 	I("");
 	I("(C) 2013, Timo Buhrmester (contact: #fstd @ irc.freenode.org)");
 	#undef I
@@ -113,7 +118,7 @@ main(int argc, char **argv)
 
 	Kernel *k = new Kernel;
 	k->init(string(g_stalkrc_path), string(g_stalkstate_path),
-			g_out_spacing);
+			g_out_spacing, g_colors);
 	bool ok = k->run();
 
 	delete k;

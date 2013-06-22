@@ -17,6 +17,12 @@
 
 #include "Kernel.h"
 
+#define COL_RED "\033[31;01m"
+#define COL_YEL "\033[33;01m"
+#define COL_GRN "\033[32;01m"
+#define COL_GRY "\033[30;01m"
+#define COL_END "\033[0m"
+
 using std::deque;
 
 Kernel::Kernel()
@@ -81,8 +87,16 @@ Kernel::run()
 		mod->init(it->first, *cfg);
 	}
 
+	display(time(NULL));
+
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
+
+		for(map<string, buddy>::iterator it = buddies_.begin();
+				it != buddies_.end(); it++) {
+			it->second.ison = false;
+		}
+
 		bool changed = false;
 		for(map<string, Module*>::const_iterator
 				it = modmap_.begin(); it != modmap_.end();
@@ -96,6 +110,7 @@ Kernel::run()
 						res.begin(); itt !=
 						res.end(); itt++) {
 					changed = true;
+					buddies_[itt->first].ison = true;
 					buddies_[itt->first].tlast = time(NULL);
 					buddies_[itt->first].plast = mod->pname();
 					buddies_[itt->first].mlast = mod->name();
@@ -116,66 +131,14 @@ Kernel::run()
 				spc = new char[spc_];
 				memset(spc, '\n', spc_-1);
 				spc[spc_-1] = '\0';
-			} else //dont do it the first time
-				puts(spc);
+			} 
+
+			puts(spc);
 		}
 
 		time_t now = time(NULL);
 
-		deque<string> unordered;
-		deque<string> ordered;
-
-		for(map<string, buddy>::const_iterator it = buddies_.begin();
-				it != buddies_.end(); it++)
-			unordered.push_back(it->first);
-
-		while(unordered.size() > 0) {
-			time_t tmax = 0;
-			string maxkey = "";
-			int maxpos = 0;
-			int c = 0;
-			for(deque<string>::const_iterator
-					it = unordered.begin();
-					it != unordered.end(); it++) {
-				if (maxkey=="" || buddies_[*it].tlast > tmax) {
-					tmax = buddies_[*it].tlast;
-					maxkey = *it;
-					maxpos = c;
-				}
-				c++;
-			}
-
-			ordered.push_back(maxkey);
-			unordered.erase(unordered.begin() + maxpos);
-		}
-		for(deque<string>::const_iterator it = ordered.begin();
-				it != ordered.end(); it++) {
-			buddy const& b = buddies_[*it];
-			if (!b.tlast) {
-				printf("%s (never seen)\n", it->c_str());
-			} else {
-				int sago = (int)(now-b.tlast);
-				char schar = 's';
-				if (sago > 60*60*24*365) {
-					schar = 'y';
-					sago /= 60*60*24*365;
-				} else if (sago > 60*60*24) {
-					schar = 'd';
-					sago /= 60*60*24;
-				} else if (sago > 60*60) {
-					schar = 'h';
-					sago /= 60*60;
-				} else if (sago > 60) {
-					schar = 'm';
-					sago /= 60;
-				}
-
-				printf("%s (%d%c ago as '%s' on '%s' using '%s')\n",
-						it->c_str(), sago, schar,
-						b.ilast.c_str(), b.plast.c_str(),
-						b.mlast.c_str());
-			}
-		}
+		display(now);
 
 		if (now < tnext)
 			sleep(tnext - now);
@@ -185,12 +148,86 @@ Kernel::run()
 }
 
 void
-Kernel::init(string const& stalkrc, string const& stalkstate, int spacing)
+Kernel::display(time_t now)
+{
+	deque<string> unordered;
+	deque<string> ordered;
+
+	for(map<string, buddy>::const_iterator it = buddies_.begin();
+			it != buddies_.end(); it++)
+		unordered.push_back(it->first);
+
+	while(unordered.size() > 0) {
+		time_t tmax = 0;
+		string maxkey = "";
+		int maxpos = 0;
+		int c = 0;
+		for(deque<string>::const_iterator
+				it = unordered.begin();
+				it != unordered.end(); it++) {
+			if (maxkey=="" || buddies_[*it].tlast > tmax) {
+				tmax = buddies_[*it].tlast;
+				maxkey = *it;
+				maxpos = c;
+			}
+			c++;
+		}
+
+		ordered.push_back(maxkey);
+		unordered.erase(unordered.begin() + maxpos);
+	}
+	for(deque<string>::const_iterator it = ordered.begin();
+			it != ordered.end(); it++) {
+		buddy const& b = buddies_[*it];
+		if (!b.tlast) {
+			printf("%s%s (never seen)%s\n",
+					col_?COL_GRY:"", it->c_str(),
+					col_?COL_END:"");
+		} else if (b.ison) {
+			printf("%s%s (online; %s@%s/%s)%s\n",
+					col_?COL_GRN:"", 
+					it->c_str(), b.ilast.c_str(),
+					b.plast.c_str(), b.mlast.c_str(),
+					col_?COL_END:"");
+		} else {
+			int sago = (int)(now-b.tlast);
+			char schar = 's';
+			const char *col = COL_YEL;
+			if (sago > 60*60*24*365) {
+				schar = 'y';
+				sago /= 60*60*24*365;
+				col = COL_RED;
+			} else if (sago > 60*60*24) {
+				schar = 'd';
+				sago /= 60*60*24;
+				col = COL_RED;
+			} else if (sago > 60*60) {
+				schar = 'h';
+				sago /= 60*60;
+			} else if (sago > 60) {
+				schar = 'm';
+				sago /= 60;
+			}
+
+			printf("%s%s (%d%c; %s@%s/%s)%s\n",
+					col_?col:"", 
+					it->c_str(), sago, schar,
+					b.ilast.c_str(), b.plast.c_str(),
+					b.mlast.c_str(),
+					col_?COL_END:"");
+		}
+	}
+}
+
+void
+Kernel::init(string const& stalkrc, string const& stalkstate,
+		int spacing, bool colors)
 {
 	spc_ = spacing;
 	statepath_ = stalkstate;
 	process_stalkrc(stalkrc);
 	load_stalkstate(statepath_);
+	col_ = colors;
 }
 
 void
@@ -264,6 +301,7 @@ Kernel::load_stalkstate(string const& path)
 		buddies_[name].mlast = string(strtok(NULL, "\t"));
 		buddies_[name].plast = string(strtok(NULL, "\t"));
 		buddies_[name].ilast = string(strtok(NULL, "\n"));
+		buddies_[name].ison = false;
 
 		free(dup);
 	}
@@ -431,6 +469,7 @@ Kernel::add_stalkee(const char *mname, vector<char*> const& user)
 	buddies_[key].plast = "N/A";
 	buddies_[key].mlast = "N/A";
 	buddies_[key].ilast = "N/A";
+	buddies_[key].ison = false;
 }
 
 void
