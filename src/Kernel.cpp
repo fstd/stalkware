@@ -17,6 +17,12 @@
 
 #include "Kernel.h"
 
+#define COL_RED "\033[31;01m"
+#define COL_YEL "\033[33;01m"
+#define COL_GRN "\033[32;01m"
+#define COL_GRY "\033[30;01m"
+#define COL_END "\033[0m"
+
 using std::deque;
 
 Kernel::Kernel()
@@ -174,20 +180,27 @@ Kernel::display(time_t now)
 			it != ordered.end(); it++) {
 		buddy const& b = buddies_[*it];
 		if (!b.tlast) {
-			printf("%s (never seen)\n", it->c_str());
+			printf("%s%s (never seen)%s\n",
+					col_?COL_GRY:"", it->c_str(),
+					col_?COL_END:"");
 		} else if (b.ison) {
-			printf("%s (online; %s@%s/%s)\n",
+			printf("%s%s (online; %s@%s/%s)%s\n",
+					col_?COL_GRN:"", 
 					it->c_str(), b.ilast.c_str(),
-					b.plast.c_str(), b.mlast.c_str());
+					b.plast.c_str(), b.mlast.c_str(),
+					col_?COL_END:"");
 		} else {
 			int sago = (int)(now-b.tlast);
 			char schar = 's';
+			const char *col = COL_YEL;
 			if (sago > 60*60*24*365) {
 				schar = 'y';
 				sago /= 60*60*24*365;
+				col = COL_RED;
 			} else if (sago > 60*60*24) {
 				schar = 'd';
 				sago /= 60*60*24;
+				col = COL_RED;
 			} else if (sago > 60*60) {
 				schar = 'h';
 				sago /= 60*60;
@@ -196,21 +209,25 @@ Kernel::display(time_t now)
 				sago /= 60;
 			}
 
-			printf("%s (%d%c; %s@%s/%s)\n",
+			printf("%s%s (%d%c; %s@%s/%s)%s\n",
+					col_?col:"", 
 					it->c_str(), sago, schar,
 					b.ilast.c_str(), b.plast.c_str(),
-					b.mlast.c_str());
+					b.mlast.c_str(),
+					col_?COL_END:"");
 		}
 	}
 }
 
 void
-Kernel::init(string const& stalkrc, string const& stalkstate, int spacing)
+Kernel::init(string const& stalkrc, string const& stalkstate,
+		int spacing, bool colors)
 {
 	spc_ = spacing;
 	statepath_ = stalkstate;
 	process_stalkrc(stalkrc);
 	load_stalkstate(statepath_);
+	col_ = colors;
 }
 
 void
