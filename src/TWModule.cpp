@@ -90,7 +90,7 @@ TWModule::check(vector<vector<string> > const& stalkees,
 						continue;
 					
 					result.push_back(pair<string, string>(
-						(*sit)[0]), cit->name_);
+						(*sit)[0], cit->name_));
 				}
 			}
 		}
