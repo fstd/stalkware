@@ -42,6 +42,7 @@ struct buddy {
 	string plast;
 	string mlast;
 	string ilast;
+	bool ison;
 };
 
 class Kernel {

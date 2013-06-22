@@ -85,6 +85,12 @@ Kernel::run()
 
 	for(;;) {
 		time_t tnext = time(NULL) + kerncfg_["pollint"].val.lng_;
+
+		for(map<string, buddy>::iterator it = buddies_.begin();
+				it != buddies_.end(); it++) {
+			it->second.ison = false;
+		}
+
 		bool changed = false;
 		for(map<string, Module*>::const_iterator
 				it = modmap_.begin(); it != modmap_.end();
@@ -98,6 +104,7 @@ Kernel::run()
 						res.begin(); itt !=
 						res.end(); itt++) {
 					changed = true;
+					buddies_[itt->first].ison = true;
 					buddies_[itt->first].tlast = time(NULL);
 					buddies_[itt->first].plast = mod->pname();
 					buddies_[itt->first].mlast = mod->name();
@@ -168,6 +175,10 @@ Kernel::display(time_t now)
 		buddy const& b = buddies_[*it];
 		if (!b.tlast) {
 			printf("%s (never seen)\n", it->c_str());
+		} else if (b.ison) {
+			printf("%s (online; %s@%s/%s)\n",
+					it->c_str(), b.ilast.c_str(),
+					b.plast.c_str(), b.mlast.c_str());
 		} else {
 			int sago = (int)(now-b.tlast);
 			char schar = 's';
@@ -273,6 +284,7 @@ Kernel::load_stalkstate(string const& path)
 		buddies_[name].mlast = string(strtok(NULL, "\t"));
 		buddies_[name].plast = string(strtok(NULL, "\t"));
 		buddies_[name].ilast = string(strtok(NULL, "\n"));
+		buddies_[name].ison = false;
 
 		free(dup);
 	}
@@ -440,6 +452,7 @@ Kernel::add_stalkee(const char *mname, vector<char*> const& user)
 	buddies_[key].plast = "N/A";
 	buddies_[key].mlast = "N/A";
 	buddies_[key].ilast = "N/A";
+	buddies_[key].ison = false;
 }
 
 void
