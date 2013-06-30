@@ -10,4 +10,6 @@ See INSTALL for generic autohell compile/install instructions.
 (C) 2013 Timo Buhrmester <van.fisted@googlemail.com>
 Contact: #fstd on irc.freenode.org
 
+See README.modules for instructions on how to create modules
+
 See COPYING for license information

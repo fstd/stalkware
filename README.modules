@@ -1,0 +1,25 @@
+How to create a module
+======================
+
+0. Pick a name for your soon-to-be module.  For this example, our module is
+     targeting the ,,Example Platform'', so we call it ,,ExampleModule''.
+
+1. Create src/ExampleModule.h and src/ExampleModule.cpp, implement a class
+     ,,ExampleModule'' there which implements the interface ,,Module'' as
+     specified and documented in src/Module.h
+
+2. In src/Kernel.h, #include and REG() the modules in the same way the
+   already existing modules are included and registered.
+
+3. Add ,,Example.cpp'' and ,,Example.h'' to src/Makefile.am
+
+4. Run ./autogen.sh
+
+5. ????
+
+6. PROFIT
+
+(Bonus points for adding example usage to ,,stalkrc.sample'')
+
+
+For a straightforward example, see the DummyModule in src/DummyModule.{h,cpp}
