@@ -125,6 +125,43 @@ Kernel::run()
 			save_stalkstate(statepath_);
 		}
 
+		if (logpath_ != "") {
+			static bool neverlogged = true;
+			vector<string> log;
+			for(map<string, buddy>::iterator it = buddies_.begin();
+					it != buddies_.end(); it++) {
+				if ((it->second.ison && !it->second.wason)
+						|| (!it->second.ison && it->second.wason)) {
+					char buf[512];
+					if (neverlogged) {
+						snprintf(buf, sizeof buf, "%lu LOGINIT\n", time(NULL));
+						log.push_back(string(buf));
+						neverlogged = false;
+					}
+
+					bool on = it->second.ison;
+					snprintf(buf, sizeof buf, "%lu %s \"%s\" \"%s\"@%s/%s\n",
+							time(NULL), on?"ON":"OFF", it->first.c_str(),
+							on?it->second.ilast.c_str():"-",
+							on?it->second.plast.c_str():"-",
+							on?it->second.mlast.c_str():"-");
+					log.push_back(string(buf));
+				}
+			}
+
+			if (log.size() > 0) {
+				errno=0;
+				FILE *fp = fopen(logpath_.c_str(), "a");
+				if (!fp)
+					warn("couldn't open log file '%s'", logpath_.c_str());
+				else {
+					for(vector<string>::const_iterator it = log.begin();
+							it != log.end(); it++)
+						fputs(it->c_str(), fp);
+					fclose(fp);
+				}
+			}
+		}
 
 		if (spc_) {
 			if (!spc) {
@@ -221,13 +258,14 @@ Kernel::display(time_t now)
 
 void
 Kernel::init(string const& stalkrc, string const& stalkstate,
-		int spacing, bool colors)
+		int spacing, bool colors, string const& logpath)
 {
 	spc_ = spacing;
 	statepath_ = stalkstate;
 	process_stalkrc(stalkrc);
 	load_stalkstate(statepath_);
 	col_ = colors;
+	logpath_ = logpath;
 }
 
 void
@@ -302,6 +340,7 @@ Kernel::load_stalkstate(string const& path)
 		buddies_[name].plast = string(strtok(NULL, "\t"));
 		buddies_[name].ilast = string(strtok(NULL, "\n"));
 		buddies_[name].ison = false;
+		buddies_[name].wason = false;
 
 		free(dup);
 	}
