@@ -161,6 +161,10 @@ Kernel::run()
 					fclose(fp);
 				}
 			}
+			for(map<string, buddy>::iterator it = buddies_.begin();
+					it != buddies_.end(); it++) {
+				it->second.wason = it->second.ison;
+			}
 		}
 
 		if (spc_) {
