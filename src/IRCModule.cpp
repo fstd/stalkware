@@ -20,7 +20,8 @@ IRCModule::IRCModule()
   pstr_("IRC"),
   conto_(30000000ul),
   sendwait_(1),
-  keepalive_(false)
+  keepalive_(false),
+  whoisto_(10)
 {
 }
 
@@ -62,6 +63,9 @@ IRCModule::init(string const& name, map<string, cfgent> const& cfg)
 
 	if (cfg.count("conto"))
 		conto_ = (unsigned long)cfg.at("conto").val.lng_;
+
+	if (cfg.count("whoisto_"))
+		whoisto_ = (int)cfg.at("whoisto").val.lng_;
 
 	if (cfg.count("keepalive"))
 		keepalive_ = (bool)cfg.at("keepalive").val.lng_;
@@ -108,7 +112,7 @@ IRCModule::check(vector<vector<string> > const& stalkees,
 
 			nextsend = time(NULL) + sendwait_;
 
-			if (find_user(intname)) {
+			if (find_user(intname, whoisto_)) {
 				result.push_back(pair<string, string>(
 						extname, intname));
 				break;
@@ -121,13 +125,15 @@ IRCModule::check(vector<vector<string> > const& stalkees,
 }
 
 bool
-IRCModule::find_user(string const& intname) const
+IRCModule::find_user(string const& intname, int to_s) const
 {
 	iprintf("WHOIS %s\r\n", intname.c_str());
 
 	bool found = true;
+	bool sure = false;
 
-	for(;;) {
+	time_t tend = time(NULL) + to_s;
+	do {
 		char *tok[16];
 		int r = ircbas_read(irc_, tok, 16, 1000);
 		if (r == 0)
@@ -146,11 +152,12 @@ IRCModule::find_user(string const& intname) const
 		} else if (strcmp(tok[1], "402") == 0) {
 			found = false;
 		} else if (strcmp(tok[1], "318") == 0) {
+			sure = true;
 			break;
 		}
-	}
+	} while(time(NULL) <= tend); //just < could suck.
 
-	return found;
+	return sure ? found : false;
 }
 
 void

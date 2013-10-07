@@ -24,8 +24,9 @@ private:
 	unsigned long conto_; //microseconds
 	int sendwait_; //seconds
 	bool keepalive_;
+	int whoisto_;
 
-	bool find_user(string const& intname) const;
+	bool find_user(string const& intname, int to_s) const;
 	void iprintf(const char *fmt, ...) const;
 
 public:
