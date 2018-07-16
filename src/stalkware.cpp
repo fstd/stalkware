@@ -34,7 +34,7 @@ process_args(int *argc, char ***argv)
 {
 	char *a0 = (*argv)[0];
 
-	for(int ch; (ch = getopt(*argc, *argv, "f:s:l:ch")) != -1;) {
+	for(int ch; (ch = getopt(*argc, *argv, "f:s:l:chS:")) != -1;) {
 		switch (ch) {
 		case 'h':
 			usage(stdout, a0, EXIT_SUCCESS);
@@ -92,6 +92,18 @@ init(int *argc, char ***argv)
 		snprintf(path, sizeof path, "%s/.stalkstate", home);
 		g_stalkstate_path = strdup(path);
 	}
+
+	if (!g_log_path || strlen(g_log_path) == 0) {
+		char path[256];
+		const char *home = getenv("HOME");
+		if (!home) {
+			warnx("no $HOME defined, using cwd");
+			home = ".";
+		}
+
+		snprintf(path, sizeof path, "%s/.stalk.log", home);
+		g_log_path = strdup(path);
+	}
 }
 
 
@@ -100,7 +112,7 @@ usage(FILE *str, const char *a0, int ec)
 {
 	#define I(STR) fputs(STR "\n", str)
 	I("=================================");
-	I("== stalkware "PACKAGE_VERSION" - blah bleh ==");
+	I("== stalkware " PACKAGE_VERSION " - blah bleh ==");
 	I("=================================");
 	fprintf(str, "usage: %s [-h]\n", a0);
 	I("");

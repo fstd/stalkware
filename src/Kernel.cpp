@@ -13,6 +13,8 @@
 #include <cstring>
 #include <cerrno>
 
+#include <unistd.h>
+
 #include <err.h>
 
 #include "Kernel.h"

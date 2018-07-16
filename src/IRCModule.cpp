@@ -12,6 +12,8 @@
 #include <cstring>
 #include <cstdarg>
 
+#include <unistd.h>
+
 #include "IRCModule.h"
 
 IRCModule::IRCModule()
@@ -27,7 +29,7 @@ IRCModule::IRCModule()
 
 IRCModule::~IRCModule()
 {
-	ircbas_dispose(irc_);
+	irc_dispose(irc_);
 }
 
 bool
@@ -40,13 +42,13 @@ IRCModule::init(string const& name, map<string, cfgent> const& cfg)
 		return false;
 	}
 
-	irc_ = ircbas_init();
+	irc_ = irc_init();
 	if (!irc_) {
 		warnx("failed to create irc handle");
 		return false;
 	}
 
-	ircbas_set_server(irc_, cfg.at("server").val.str_, (unsigned short)
+	irc_set_server(irc_, cfg.at("server").val.str_, (unsigned short)
 			(cfg.count("port")?cfg.at("port").val.lng_:6667));
 
 	char nick[10];
@@ -55,11 +57,11 @@ IRCModule::init(string const& name, map<string, cfgent> const& cfg)
 	
 	nick[sizeof nick - 1] = '\0';
 
-	ircbas_set_nick(irc_, nick);
+	irc_set_nick(irc_, nick);
 
 	if (cfg.count("pass"))
-		ircbas_set_pass(irc_, cfg.at("pass").val.str_);
-	ircbas_set_conflags(irc_, 8);
+		irc_set_pass(irc_, cfg.at("pass").val.str_);
+	irc_set_conflags(irc_, 8);
 
 	if (cfg.count("conto"))
 		conto_ = (unsigned long)cfg.at("conto").val.lng_;
@@ -89,10 +91,11 @@ IRCModule::check(vector<vector<string> > const& stalkees,
 	if (stalkees.size() == 0)
 		return;
 	
-	if (!ircbas_online(irc_)) {
-		if (!ircbas_connect(irc_, conto_)) {
+	if (!irc_online(irc_)) {
+		irc_set_connect_timeout(irc_, 0, conto_);
+		if (!irc_connect(irc_)) {
 			warnx("failed to logon to IRC");
-			ircbas_reset(irc_);
+			irc_reset(irc_);
 			throw (std::exception());
 		}
 	}
@@ -121,7 +124,7 @@ IRCModule::check(vector<vector<string> > const& stalkees,
 	}
 
 	if (!keepalive_)
-		ircbas_reset(irc_);
+		irc_reset(irc_);
 }
 
 bool
@@ -134,14 +137,14 @@ IRCModule::find_user(string const& intname, int to_s) const
 
 	time_t tend = time(NULL) + to_s;
 	do {
-		char *tok[16];
-		int r = ircbas_read(irc_, tok, 16, 1000);
+		tokarr tok;
+		int r = irc_read(irc_, &tok, 1000000);
 		if (r == 0)
 			continue;
 
 		if (r < 0) {
 			warnx("failed to read from server");
-			ircbas_reset(irc_);
+			irc_reset(irc_);
 			throw (std::exception());
 		}
 
@@ -169,9 +172,9 @@ IRCModule::iprintf(const char *fmt, ...) const
 	vsnprintf(buf, sizeof buf, fmt, l);
 	va_end(l);
 
-	if (!ircbas_write(irc_, buf)) {
+	if (!irc_write(irc_, buf)) {
 		warnx("failed to write to server");
-		ircbas_reset(irc_);
+		irc_reset(irc_);
 		throw (std::exception());
 	}
 }

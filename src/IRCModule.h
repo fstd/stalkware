@@ -10,8 +10,9 @@
 #endif
 
 extern "C" {
-#include <libsrsirc/irc_basic.h>
-#include <libsrsirc/irc_util.h>
+#include <libsrsirc/irc.h>
+#include <libsrsirc/util.h>
+#include <libsrsirc/irc_ext.h>
 }
 
 #include "Module.h"
@@ -20,7 +21,7 @@ class IRCModule : public Module {
 private:
 	string name_;
 	string pstr_;
-	ibhnd_t irc_;
+	irc *irc_;
 	unsigned long conto_; //microseconds
 	int sendwait_; //seconds
 	bool keepalive_;
